@@ -1,3 +1,5 @@
+import { ResModel } from './../../common/class/index.class'
+import { HttpException } from '@nestjs/common'
 /*
  * @Author: your name
  * @Date: 2020-09-27 02:46:26
@@ -6,23 +8,24 @@
  * @Description: In User Settings Edit
  * @FilePath: /server/src/modules/user/user.service.ts
  */
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
 import { UserLoginDto } from './dto/userLogin.dto'
-import { UserRegisterDto } from './dto/userRegister.dto';
+import { UserRegisterDto } from './dto/userRegister.dto'
 import uRequest from '../../utils/request'
 import { User } from './entity/user.entity'
 
 import createMysqlID from '@/utils/createMysqlId'
-import formatDate from '@/utils/formatDate';
+import formatDate from '@/utils/formatDate'
+import { encryptPassword } from '@/utils/crypto'
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>
 
   ) {}
 
@@ -34,49 +37,31 @@ export class UserService {
     return username
   }
 
-  async register(form:UserRegisterDto){
-    const user = new User(form.username,form.password,form.email,form.mobile)
-    user.id = createMysqlID()
-    user.createtime = formatDate(new Date())
-    user.status = 1
-    console.log(user.id)
+  async register(form:UserRegisterDto) {
+    // 从数据库查询email是否已存在
+    const findOne = await this.userRepository.findOne({ email: form.email })
+    if (findOne) {
+      return new ResModel(0, { }, '新增失败，该邮箱已注册')
+    }
+
+    // 用户信息校验
+    const id = createMysqlID()
+    const password = encryptPassword(form.password, id)
+    const user = new User(id, form.username, password, form.email, form.mobile)
+
     // 储存到数据库
-    // await this.userRepository.save(user)
-    // 返回用户ID
-    return user.id
-    
+    await this.userRepository.save(user)
+    return new ResModel(1, { id: user.id }, '新增成功')
   }
 
   async login(form: UserLoginDto) {
-    // const options = {
-    //   url: 'http://lkong.cn/index.php?mod=login',
-    //   method: 'POST',
-    //   data: {
-    //     email: form.email,
-    //     password: form.password,
-    //     action: 'login',
-    //     rememberme: 'on'
-    //   }
-    // }
-    // console.log('login');
-    // return uRequest(options)
-    //   .then(res => {
-        
-    //     const user = new User()
-    //     user.id = createMysqlID()
-    //     user.username = res.name
-    //     user.email = form.email
-    //     user.password = form.password
-    //     user.mobile = 13165969652
-    //     user.createtime = ''
-    //     user.status = 1
-
-    //     this.userRepository.save(user)
-
-    //     return res
-    //   })
-    //   .catch(e => {
-    //     throw e
-    //   })
+    // 从数据库查询email是否已存在
+    const findOne = await this.userRepository.findOne({ email: form.email })
+    if (findOne) {
+      const password = encryptPassword(form.password, findOne.id)
+      return new ResModel(1, { id: findOne.id, username: findOne.username }, '登录成功')
+    } else {
+      return new ResModel(0, {}, '邮箱/密码错误')
+    }
   }
 }

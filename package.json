@@ -36,6 +36,7 @@
     "biguint-format": "^1.0.2",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
+    "crypto": "^1.0.1",
     "flake-idgen": "^1.4.0",
     "mysql": "^2.18.1",
     "passport": "^0.4.1",

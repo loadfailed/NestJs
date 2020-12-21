@@ -9,7 +9,7 @@
 import FlakeId = require('flake-idgen')
 import intformat = require('biguint-format')
 
-const flakeIdGen = new FlakeId({ epoch: 199412080000 })
+const flakeIdGen = new FlakeId()
 
 export default () => {
   return intformat(flakeIdGen.next(), 'dec')

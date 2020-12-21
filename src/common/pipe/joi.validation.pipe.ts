@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { ObjectSchema } from '@hapi/joi'
 import {
   ArgumentMetadata,
   BadRequestException,
@@ -31,8 +29,17 @@ export class JoiValidationPipe implements PipeTransform<any> {
     }
     const object = plainToClass(metatype, value)
     const error = await validate(object)
+    const message = error.map(err => {
+      return Object
+        .keys(err.constraints)
+        .map(value => err.constraints[value])
+        .join(';')
+    }).join(';')
     if (error.length > 0) {
-      throw new BadRequestException(error[0].constraints.isString)
+      throw new BadRequestException({
+        code: 0,
+        message
+      })
     }
     return value
   }

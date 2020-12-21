@@ -1,3 +1,4 @@
+import { ResModel } from './../class/index.class'
 /*
  * @Author: your name
  * @Date: 2020-09-27 23:31:34
@@ -20,26 +21,14 @@ import { map, catchError } from 'rxjs/operators'
 export class MainInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      map(data => {
-        return {
-          code: 1,
-          data,
-          msg: '请求成功'
+      map(res => {
+        if (res instanceof ResModel) return res
+        else {
+          throw new Error(context.getHandler().toString())
         }
       }),
       catchError(err => {
-        if (err instanceof HttpException) {
-          throw err
-        } else {
-          throw new HttpException(
-            {
-              code: 0,
-              data: {},
-              message: err.error
-            },
-            200
-          )
-        }
+        throw err
       })
     )
   }

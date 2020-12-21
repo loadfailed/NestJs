@@ -8,8 +8,8 @@
  */
 import { MainInterceptor } from './common/interceptor/main.interceptor'
 import { AuthGuard } from './common/guard/auth.guard'
-// import { AnyExceptionFilter } from './common/filter/any.exception.filter'
-// import { HttpExceptionFilter } from './common/filter/http.exception.filter'
+import { AnyExceptionFilter } from './common/filter/any.exception.filter'
+import { HttpExceptionFilter } from './common/filter/http.exception.filter'
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
@@ -19,8 +19,8 @@ import 'reflect-metadata'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   app.use(logger)
-  // app.useGlobalFilters(new AnyExceptionFilter())
-  // app.useGlobalFilters(new HttpExceptionFilter())
+  app.useGlobalFilters(new AnyExceptionFilter())
+  app.useGlobalFilters(new HttpExceptionFilter())
   app.useGlobalInterceptors(new MainInterceptor())
   app.useGlobalGuards(new AuthGuard())
   const swaggerOptions = new DocumentBuilder()

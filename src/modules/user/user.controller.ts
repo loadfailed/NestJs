@@ -1,7 +1,7 @@
-import { LoginInterceptor,CreateInterceptor } from '@/common/interceptor/user.interceptor'
+import { LoginInterceptor, CreateInterceptor } from '@/common/interceptor/user.interceptor'
 import { UserService } from './user.service'
 import { UserLoginDto } from './dto/userLogin.dto'
-import { UserRegisterDto } from './dto/userRegister.dto';
+import { UserRegisterDto } from './dto/userRegister.dto'
 import {
   Controller,
   Query,
@@ -34,11 +34,11 @@ export class UserController {
     return this.UserService.login(UserLoginDto)
   }
 
-    // 注册
-    @Post('register')
-    @ApiBody({ description: '请输入注册信息', required: true })
-    @UsePipes(new JoiValidationPipe())
-    register(@Body() userInfo: UserRegisterDto) {
-      return this.UserService.register(userInfo)
-    }
+  // 注册
+  @Post('register')
+  @ApiBody({ description: '请输入注册信息', required: true })
+  @UsePipes(new JoiValidationPipe())
+  register(@Body() userInfo: UserRegisterDto) {
+    return this.UserService.register(userInfo)
+  }
 }
