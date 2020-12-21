@@ -32,8 +32,7 @@ export class JoiValidationPipe implements PipeTransform<any> {
     const object = plainToClass(metatype, value)
     const error = await validate(object)
     if (error.length > 0) {
-      console.log(`Pipe校验失败:`, error)
-      throw new BadRequestException()
+      throw new BadRequestException(error[0].constraints.isString)
     }
     return value
   }

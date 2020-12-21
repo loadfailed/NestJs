@@ -6,14 +6,26 @@ import {
   NestInterceptor
 } from '@nestjs/common'
 import { Observable } from 'rxjs'
-import mysqlID from '../../utils//mysql_id'
 
 @Injectable()
 export class LoginInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map(data => {
-        console.log(mysqlID())
+        return data
+      }),
+      catchError(err => {
+        throw err
+      })
+    )
+  }
+}
+
+@Injectable()
+export class CreateInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      map(data => {
         return data
       }),
       catchError(err => {

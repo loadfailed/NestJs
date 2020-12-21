@@ -10,12 +10,13 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 
-import { UserLoginDto } from './dto/user_login.dto'
+import { UserLoginDto } from './dto/userLogin.dto'
+import { UserRegisterDto } from './dto/userRegister.dto';
 import uRequest from '../../utils/request'
 import { User } from './entity/user.entity'
-import { UserDetail } from './entity/user_detail.entity'
 
-import mysqlID from '../../utils//mysql_id'
+import createMysqlID from '@/utils/createMysqlId'
+import formatDate from '@/utils/formatDate';
 
 @Injectable()
 export class UserService {
@@ -23,8 +24,6 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    @InjectRepository(UserDetail)
-    private readonly userDetailRepository: Repository<UserDetail>
   ) {}
 
   // findOne(username: string): Promise<User | undefined> {
@@ -35,42 +34,49 @@ export class UserService {
     return username
   }
 
+  async register(form:UserRegisterDto){
+    const user = new User(form.username,form.password,form.email,form.mobile)
+    user.id = createMysqlID()
+    user.createtime = formatDate(new Date())
+    user.status = 1
+    console.log(user.id)
+    // 储存到数据库
+    // await this.userRepository.save(user)
+    // 返回用户ID
+    return user.id
+    
+  }
+
   async login(form: UserLoginDto) {
-    const options = {
-      url: 'http://lkong.cn/index.php?mod=login',
-      method: 'POST',
-      data: {
-        email: form.email,
-        password: form.password,
-        action: 'login',
-        rememberme: 'on'
-      }
-    }
+    // const options = {
+    //   url: 'http://lkong.cn/index.php?mod=login',
+    //   method: 'POST',
+    //   data: {
+    //     email: form.email,
+    //     password: form.password,
+    //     action: 'login',
+    //     rememberme: 'on'
+    //   }
+    // }
+    // console.log('login');
+    // return uRequest(options)
+    //   .then(res => {
+        
+    //     const user = new User()
+    //     user.id = createMysqlID()
+    //     user.username = res.name
+    //     user.email = form.email
+    //     user.password = form.password
+    //     user.mobile = 13165969652
+    //     user.createtime = ''
+    //     user.status = 1
 
-    return uRequest(options)
-      .then(res => {
-        const user = new User()
-        user.id = mysqlID()
-        user.lkongid = res.uid
-        user.username = res.name
-        user.email = form.email
-        user.password = form.password
-        user.phone = 13165969652
-        user.openid = ''
+    //     this.userRepository.save(user)
 
-        const userDetail = new UserDetail()
-        userDetail.id = mysqlID()
-        userDetail.lkongid = user.lkongid
-        userDetail.username = user.username
-        userDetail.user = user
-
-        this.userRepository.save(user)
-        this.userDetailRepository.save(userDetail)
-
-        return res
-      })
-      .catch(e => {
-        throw e
-      })
+    //     return res
+    //   })
+    //   .catch(e => {
+    //     throw e
+    //   })
   }
 }

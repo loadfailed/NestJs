@@ -6,35 +6,38 @@
  * @Description: In User Settings Edit
  * @FilePath: /server/src/modules/user/entity/user.entity.ts
  */
-import { UserDetail } from './user_detail.entity'
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm'
+// import { UserDetail } from './user_dy_following.entity'
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class User {
-  @PrimaryColumn({ type: 'bigint', width: 13 })
-  id: number
 
-  @Column({ type: 'bigint', width: 8 })
-  lkongid: number
+  constructor(username:string,password:string,email:string,mobile:string){
+    this.username = username
+    this.email = email
+    this.password = password
+    this.mobile = mobile
+  }
+
+  @PrimaryGeneratedColumn({ type: 'int' })
+  id: string
 
   @Column({ type: 'varchar', length: 16 })
-  username: string
+  username: string | undefined
 
   @Column({ type: 'varchar', length: 32 })
-  email: string
+  email: string | undefined
 
   @Column({ type: 'varchar', length: 64 })
-  password: string
+  password: string | undefined
 
-  @Column({ type: 'bigint', width: 11 })
-  phone: number
+  @Column({ type: 'varchar', length: 20 })
+  mobile: string | undefined
 
-  @Column({ type: 'varchar', length: 64 })
-  openid: string
+  @Column({ type: 'datetime'})
+  createtime: string | undefined
 
-  @OneToOne(
-    () => UserDetail,
-    userDetail => userDetail.user
-  )
-  detail: UserDetail
+  @Column({ type: 'int'})
+  status: number | undefined
+
 }

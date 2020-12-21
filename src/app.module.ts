@@ -13,7 +13,6 @@ import { Module } from '@nestjs/common'
 import { ExceptionController } from './modules/exception/exception.controller'
 
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { Connection } from 'typeorm'
 
 @Module({
   imports: [
@@ -21,10 +20,10 @@ import { Connection } from 'typeorm'
     UserModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '120.92.107.79',
+      host: '111.231.114.121',
       port: 3306,
       username: 'root',
-      password: '@Sunway712520',
+      password: '@sunway2020',
       database: 'test',
       autoLoadEntities: true,
       synchronize: true

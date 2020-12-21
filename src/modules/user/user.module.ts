@@ -6,7 +6,6 @@
  * @Description: In User Settings Edit
  * @FilePath: /server/src/modules/user/user.module.ts
  */
-import { UserDetail } from './entity/user_detail.entity'
 import { User } from './entity/user.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Module } from '@nestjs/common'
@@ -14,7 +13,7 @@ import { UserService } from './user.service'
 import { UserController } from './user.controller'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserDetail])],
+  imports: [TypeOrmModule.forFeature([User])],
   providers: [UserService],
   controllers: [UserController]
 })

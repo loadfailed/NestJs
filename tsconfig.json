@@ -13,7 +13,8 @@
     "incremental": true,
     "paths": {
       "@app/hello": ["libs/hello/src"],
-      "@app/hello/*": ["libs/hello/src/*"]
+      "@app/hello/*": ["libs/hello/src/*"],
+      "@/*": ["src/*"]
     }
   }
 }
