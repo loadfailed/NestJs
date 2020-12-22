@@ -1,3 +1,4 @@
+import { DyModule } from './modules/dy/dy.module'
 /*
  * @Author: your name
  * @Date: 2020-09-26 13:44:29
@@ -18,6 +19,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
   imports: [
     HelloModule,
     UserModule,
+    DyModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: '111.231.114.121',
