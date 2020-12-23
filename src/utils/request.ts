@@ -22,10 +22,9 @@ const uRequest = async (options: RequestParamsConfig): Promise<any> => {
         form: options.data
       },
       function (err, res, body) {
-        console.log(res.headers['set-cookie'])
         const response = JSON.parse(body)
-        if (response.error) {
-          reject(response)
+        if (err || response.error) {
+          reject(err || response)
         } else {
           resolve(response)
         }

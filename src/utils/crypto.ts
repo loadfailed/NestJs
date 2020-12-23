@@ -5,7 +5,7 @@ import * as crypto from 'crypto'
  * @param password 密码
  * @param salt 密码盐，UserId
  */
-export function encryptPassword(password: string, salt: string): string {
+export function encryptoPassword(password: string, salt: string): string {
   if (!password || !salt) {
     return ''
   }

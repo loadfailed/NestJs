@@ -19,22 +19,21 @@ import { User } from './entity/user.entity'
 
 import createMysqlID from '@/utils/createMysqlId'
 import formatDate from '@/utils/formatDate'
-import { encryptPassword } from '@/utils/crypto'
+import { encryptoPassword } from '@/utils/crypto'
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>
-
   ) {}
 
   // findOne(username: string): Promise<User | undefined> {
   //   return new Promise()
   // }
 
-  findOne(username: string) {
-    return username
+  async findOne(email: string):Promise<any> {
+    return await this.userRepository.findOne({ email })
   }
 
   async register(form:UserRegisterDto) {
@@ -46,7 +45,7 @@ export class UserService {
 
     // 用户信息校验
     const id = createMysqlID()
-    const password = encryptPassword(form.password, id)
+    const password = encryptoPassword(form.password, id)
     const user = new User(id, form.username, password, form.email, form.mobile)
 
     // 储存到数据库
@@ -58,7 +57,7 @@ export class UserService {
     // 从数据库查询email是否已存在
     const findOne = await this.userRepository.findOne({ email: form.email })
     if (findOne) {
-      const password = encryptPassword(form.password, findOne.id)
+      const password = encryptoPassword(form.password, findOne.id)
       return new ResModel(1, { id: findOne.id, username: findOne.username }, '登录成功')
     } else {
       return new ResModel(0, {}, '邮箱/密码错误')
