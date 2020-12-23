@@ -11,13 +11,11 @@ export class ResModel {
 }
 
 export class JwtPayload {
-  constructor(id:string, username:string, email:string) {
+  constructor(id:string, username:string) {
     this.id = id
     this.username = username
-    this.email = email
   }
 
     readonly id:string
     readonly username: string
-    readonly email: string
 }

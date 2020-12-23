@@ -1,7 +1,7 @@
 import { ResModel } from '@/common/class/index.class'
 import { UserService } from '@/modules/user/user.service'
 import { AuthService } from './auth.service'
-import { Body, Controller, Get, Post, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common'
+import { Body, Controller, Get, Post, UnauthorizedException, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common'
 import { ApiBody } from '@nestjs/swagger'
 import { LoginInterceptor } from '@/common/interceptor/user.interceptor'
 import { JoiValidationPipe } from '@/common/pipe/joi.validation.pipe'
@@ -27,8 +27,8 @@ export class AuthController {
     @UseInterceptors(LoginInterceptor)
     @UsePipes(new JoiValidationPipe())
     async login(@Body() loginInfo: UserLoginDto) {
-      // this.authService.test()
-      const result = await this.authService.validateUser(loginInfo.email, loginInfo.password)
-      return result
+      const result = await this.authService.validateUser(loginInfo.username, loginInfo.password)
+      if (result) return new ResModel(1, { ...result }, '登录成功')
+      else throw new UnauthorizedException(new ResModel(0, { }, '用户名/密码错误'))
     }
 }

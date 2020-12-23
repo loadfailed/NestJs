@@ -8,24 +8,25 @@
  */
 // import { UserDetail } from './user_dy_following.entity'
 import formatDate from '@/utils/formatDate'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { encryptoPassword } from '@/utils/crypto'
+import createMysqlID from '@/utils/createMysqlId'
 
 @Entity()
 export class User {
-  constructor(id:string, username:string, password:string, email:string, mobile:string) {
-    this.id = id
+  constructor(username:string, password:string, email:string, mobile:string) {
+    this.id = createMysqlID()
     this.username = username
     this.email = email
-    this.password = password
+    this.password = encryptoPassword(password, this.id)
     this.mobile = mobile
-    this.createtime = formatDate(new Date())
-    this.status = 1
   }
 
   @PrimaryGeneratedColumn({ type: 'bigint' })
   id: string
 
   @Column({ type: 'varchar', length: 16 })
+  @Index({ unique: true })
   username: string | undefined
 
   @Column({ type: 'varchar', length: 32 })
@@ -37,9 +38,12 @@ export class User {
   @Column({ type: 'varchar', length: 20 })
   mobile: string | undefined
 
-  @Column({ type: 'datetime' })
+  @Column({ type: 'datetime', default: formatDate(new Date()) })
   createtime: string | undefined
 
-  @Column({ type: 'tinyint' })
+  @Column({ type: 'simple-array', default: [] })
+  following: string[]
+
+  @Column({ type: 'enum', enum: [-1, 0, 1], default: 1 })
   status: number | undefined
 }

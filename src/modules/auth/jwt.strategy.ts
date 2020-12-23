@@ -16,8 +16,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload, done: VerifiedCallback) {
-    const { email } = payload
-    const entity = await this.userService.findOne(email)
+    const { username } = payload
+    console.log('jwt')
+    const entity = await this.userService.findOne(username)
     if (!entity) {
       throw new UnauthorizedException(new ResModel(0, { entity }, '用户不存在'))
     }

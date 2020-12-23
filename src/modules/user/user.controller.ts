@@ -1,3 +1,4 @@
+import { ResModel } from './../../common/class/index.class'
 import { LoginInterceptor, CreateInterceptor } from '@/common/interceptor/user.interceptor'
 import { UserService } from './user.service'
 import { UserLoginDto } from './dto/userLogin.dto'
@@ -21,11 +22,10 @@ export class UserController {
     private readonly userService: UserService
   ) {}
 
-  // 查询用户
+  // 测试连接
   @Get()
-  @ApiQuery({ name: 'username', required: true })
-  find(@Query() { username }) {
-    return this.userService.findOne(username)
+  test() {
+    return new ResModel(1, {}, 'test')
   }
 
   // 注册

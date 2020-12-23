@@ -14,17 +14,17 @@ export class AuthService {
     private readonly jwtService:JwtService
   ) {}
 
-  async validateUser(email:string, password:string):Promise<any> {
+  async validateUser(username:string, password:string):Promise<any> {
     // 从数据库查询email是否已存在
-    const findOne = await this.userService.findOne(email)
+    const findOne = await this.userService.findOne(username)
     const enCryptoPwd = encryptoPassword(password, findOne?.id)
     if (findOne && findOne.password === enCryptoPwd) {
-      const { id, email, username }:JwtPayload = findOne
-      const payload = { id, username, email }
+      const { id, username }:JwtPayload = findOne
+      const payload = { id, username }
       const token = this.signToken(payload)
-      return new ResModel(1, { id, username, token }, '登录成功')
+      return { id, username, token }
     } else {
-      throw new UnauthorizedException(new ResModel(0, {}, '用户名/密码错误。'))
+      return null
     }
   }
 
