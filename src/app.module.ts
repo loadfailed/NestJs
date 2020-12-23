@@ -1,12 +1,4 @@
 import { AuthModule } from './modules/auth/auth.module'
-/*
- * @Author: your name
- * @Date: 2020-09-26 13:44:29
- * @LastEditTime: 2020-10-07 17:37:55
- * @LastEditors: Please set LastEditors
- * @Description: In User Settings Edit
- * @FilePath: /server/src/app.module.ts
- */
 import { UserModule } from './modules/user/user.module'
 import { HelloModule } from './modules/hello/hello.module'
 
