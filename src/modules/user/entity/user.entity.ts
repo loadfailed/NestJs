@@ -27,7 +27,7 @@ export class User {
 
   @Column({ type: 'varchar', length: 16 })
   @Index({ unique: true })
-  username: string | undefined
+  username: string
 
   @Column({ type: 'varchar', length: 32 })
   email: string | undefined
@@ -39,11 +39,11 @@ export class User {
   mobile: string | undefined
 
   @Column({ type: 'datetime', default: formatDate(new Date()) })
-  createtime: string | undefined
+  createtime: string
 
-  @Column({ type: 'simple-array', default: [] })
+  @Column({ type: 'simple-array' })
   following: string[]
 
   @Column({ type: 'enum', enum: [-1, 0, 1], default: 1 })
-  status: number | undefined
+  status: number
 }
