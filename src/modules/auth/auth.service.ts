@@ -16,7 +16,7 @@ export class AuthService {
 
   async validateUser(username:string, password:string):Promise<any> {
     // 从数据库查询email是否已存在
-    const findOne = await this.userService.findOne(username)
+    const findOne = await this.userService.findOne({ username })
     const enCryptoPwd = encryptoPassword(password, findOne?.id)
     if (findOne && findOne.password === enCryptoPwd) {
       const { id, username }:JwtPayload = findOne

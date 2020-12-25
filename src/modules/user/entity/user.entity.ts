@@ -7,7 +7,7 @@
  * @FilePath: /server/src/modules/user/entity/user.entity.ts
  */
 // import { UserDetail } from './user_dy_following.entity'
-import formatDate from '@/utils/formatDate'
+import { formatDate } from '@/utils/formatDate'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { encryptoPassword } from '@/utils/crypto'
 import createMysqlID from '@/utils/createMysqlId'
@@ -19,7 +19,10 @@ export class User {
     this.username = username
     this.email = email
     this.password = encryptoPassword(password, this.id)
+    this.updatetime = formatDate(new Date())
     this.mobile = mobile
+    this.following = []
+    this.uploaded = []
   }
 
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -41,9 +44,15 @@ export class User {
   @Column({ type: 'datetime', default: formatDate(new Date()) })
   createtime: string
 
+  @Column({ type: 'datetime', default: formatDate(new Date()) })
+  updatetime: string
+
   @Column({ type: 'simple-array' })
   following: string[]
 
   @Column({ type: 'enum', enum: [-1, 0, 1], default: 1 })
   status: number
+
+  @Column({ type: 'simple-array' })
+  uploaded: string[]
 }

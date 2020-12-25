@@ -5,46 +5,48 @@
      * @returns 返回格式化后的日期字符串
      */
 function formatDate(date:Date | string | number) {
-      if (!date) return
-    
-      const format = 'yyyy-MM-dd hh:mm:ss'
-      switch (typeof date) {
-        case 'string':
-          date = new Date(date)
-          break
-        case 'number':
-          date = new Date(date)
-          break
-      }
-      if (!(date instanceof Date)) return
-    
-      const dict = {
-    
-        'yyyy': date.getFullYear(),
-    
-        'M': date.getMonth() + 1,
-    
-        'd': date.getDate(),
-    
-        'h': date.getHours(),
-    
-        'm': date.getMinutes(),
-    
-        's': date.getSeconds(),
-    
-        'MM': ('' + (date.getMonth() + 101)).substr(1),
-    
-        'dd': ('' + (date.getDate() + 100)).substr(1),
-    
-        'hh': ('' + (date.getHours() + 100)).substr(1),
-    
-        'mm': ('' + (date.getMinutes() + 100)).substr(1),
-    
-        'ss': ('' + (date.getSeconds() + 100)).substr(1)
-    
-      }
-    
-      return format.replace(/(yyyy|MM?|dd?|hh?|ss?|mm?)/g, val => dict[val] )
+  if (!date) return
+
+  const format = 'yyyy-MM-dd hh:mm:ss'
+  switch (typeof date) {
+    case 'string':
+      date = new Date(date)
+      break
+    case 'number':
+      date = new Date(date)
+      break
+  }
+  if (!(date instanceof Date)) return
+
+  const dict = {
+
+    'yyyy': date.getFullYear(),
+
+    'M': date.getMonth() + 1,
+
+    'd': date.getDate(),
+
+    'h': date.getHours(),
+
+    'm': date.getMinutes(),
+
+    's': date.getSeconds(),
+
+    'MM': ('' + (date.getMonth() + 101)).substr(1),
+
+    'dd': ('' + (date.getDate() + 100)).substr(1),
+
+    'hh': ('' + (date.getHours() + 100)).substr(1),
+
+    'mm': ('' + (date.getMinutes() + 100)).substr(1),
+
+    'ss': ('' + (date.getSeconds() + 100)).substr(1)
+
+  }
+
+  return format.replace(/(yyyy|MM?|dd?|hh?|ss?|mm?)/g, val => dict[val])
 }
 
-export default formatDate
+export {
+  formatDate
+}

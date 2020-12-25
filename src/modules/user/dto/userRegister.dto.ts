@@ -1,15 +1,15 @@
 import { IsEmail, IsString } from 'class-validator'
 
 export class UserRegisterDto {
-  @IsString()
+  @IsString({ message: '请输入用户名(username)' })
   readonly username: string
 
-  @IsEmail({}, { message: '请输入正确的邮箱' })
+  @IsEmail({}, { message: '请输入邮箱(email)' })
   readonly email: string
 
-  @IsString()
+  @IsString({ message: '请输入密码(password)' })
   readonly password: string
 
-  @IsString()
+  @IsString({ message: '请输入手机号(mobile)' })
   readonly mobile: string
 }
