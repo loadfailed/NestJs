@@ -1,16 +1,16 @@
+import { DyAweme } from './dyAweme.entity'
 import { formatDate } from '@/utils/formatDate'
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity()
 export class DyUser {
-  constructor(id:string, u_code:string, nickname:string, aweme_count:number, sec_uid:string, aweme_list:Array<string>) {
+  constructor(id:string, u_code:string, nickname:string, aweme_count:number, sec_uid:string, aweme_list?:Array<DyAweme>) {
     this.id = id
     this.u_code = u_code
     this.nickname = nickname
     this.aweme_count = aweme_count
     this.sec_uid = sec_uid
     this.updatetime = formatDate(new Date())
-    this.aweme_list = aweme_list
   }
 
   @PrimaryGeneratedColumn({ type: 'bigint' })
@@ -38,6 +38,6 @@ export class DyUser {
   @Column({ type: 'enum', enum: [-1, 0, 1], default: 1 })
   status: number
 
-  @Column({ type: 'simple-array' })
-  aweme_list:Array<string>
+  @OneToMany(type => DyAweme, aweme => aweme.dyUser)
+  aweme_list:Array<DyAweme>
 }

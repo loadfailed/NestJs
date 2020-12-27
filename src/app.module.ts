@@ -16,13 +16,15 @@ import { DyModule } from './modules/dy/dy.module'
     DyModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '111.231.114.121',
+      host: '120.92.107.79',
       port: 3306,
       username: 'root',
       password: '@sunway2020',
       database: 'test',
       autoLoadEntities: true,
-      synchronize: true
+      synchronize: true,
+      charset: 'utf8mb4'
+
     })
   ],
   controllers: [ExceptionController]
