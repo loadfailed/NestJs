@@ -47,7 +47,7 @@ export class DyController {
   startWatch(@Request() { user }) {
     let requsetLock = false
     // 异步查询awemelist
-    watcher[user.username] = new CronJob('*/30 * 6-23 * * *', async () => {
+    watcher[user.username] = new CronJob('*/10 * 7-23 * * *', async () => {
       // 如果已经有查询，就跳过本次查询
       if (requsetLock) return
 
@@ -59,13 +59,12 @@ export class DyController {
           const remoteUser = await queryRemoteDyUserInfo(localUser.sec_uid)
           if (localUser.aweme_count !== remoteUser.aweme_count) {
             const remoteAwemeList = await this.dyService.queryRemoteAwemeList(localUser.id)
-
             // 获取新更新的，数据库里还没有的
             const tempIds = localUser.aweme_list.map(v => v.id)
             const news = remoteAwemeList.filter((item:DyAweme) => {
               const now = new Date().getTime()
               const upload = new Date(item.uploadTime).getTime()
-              const timeResult = (now - upload) <= (72 * 60 * 60 * 1000)
+              const timeResult = (now - upload) <= (0.25 * 60 * 60 * 1000)
               const includeResult = !(tempIds.includes(item.id))
               return timeResult && includeResult
             })
@@ -86,9 +85,9 @@ export class DyController {
       // 获取数据更新
       Promise.all(queryRemoteDataRequestList)
         .then((res:Array<WatcherResult>) => {
-          console.log('query', res)
           requsetLock = false
           const list = res.filter(v => v.user)
+          console.log('list', list)
           sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
           // sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
           // batchDownloadVideo(list)

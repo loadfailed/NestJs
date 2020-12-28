@@ -100,9 +100,9 @@ export class DyService {
     }
     const usedTime = (new Date().getTime() - startTime) / 1000
     if (count >= 500 || usedTime >= 100) {
-      this.logger.warn(`请求用户视频列表 ${count} 次耗时 ${usedTime}`)
+      this.logger.error(`请求用户${id}的视频列表 ${count} 次耗时 ${usedTime}`)
     } else {
-      this.logger.log(`请求用户视频列表 ${count} 次耗时 ${usedTime}`)
+      this.logger.log(`请求用户${id}的视频列表 ${count} 次耗时 ${usedTime}`)
     }
     return result
   }
