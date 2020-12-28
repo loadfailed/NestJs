@@ -5,10 +5,9 @@ import { Repository, getRepository, createQueryBuilder } from 'typeorm'
 
 import { InjectRepository } from '@nestjs/typeorm'
 import { queryRemoteDyUserAwemeList, queryRemoteDyUserInfo, queryRemoteDyUserSecUid } from './utils/queryRemoteDyService'
-import { notInDBAweme } from './utils/notInDBAweme'
-import { test } from './utils/test'
 import { DyAweme } from './entity/dyAweme.entity'
-import axios from 'axios'
+
+// import { promises as fs } from 'fs'
 
 interface FindDyUser {
     id?:number,
@@ -29,12 +28,10 @@ export class DyService {
   // 查询抖音用户并保存到数据库
   async createDyUser(u_code:string) {
     const localUser = await this.findOne({ u_code })
-    let sec_uid:string
-    localUser
-      ? sec_uid = localUser.sec_uid
-      : sec_uid = await queryRemoteDyUserSecUid(u_code)
+    const sec_uid = localUser.sec_uid ?? await queryRemoteDyUserSecUid(u_code)
     const remoteUser = await queryRemoteDyUserInfo(sec_uid)
     const { id, nickname, aweme_count } = remoteUser
+    // if (!localUser) fs.mkdir(`./aweme/${id}`)
     const aweme_list = await this.queryRemoteAwemeList(id)
     const dyUser = await this.saveDyUser({ id, nickname, aweme_count, u_code, sec_uid })
     await this.saveDyAweme(aweme_list, dyUser)
@@ -101,8 +98,12 @@ export class DyService {
       result = await queryRemoteDyUserAwemeList(id)
       count++
     }
-    const endTime = new Date().getTime()
-    this.logger.log(`请求用户视频列表 ${count} 次耗时 ${(endTime - startTime) / 1000}`)
+    const usedTime = (new Date().getTime() - startTime) / 1000
+    if (count >= 500 || usedTime >= 100) {
+      this.logger.warn(`请求用户视频列表 ${count} 次耗时 ${usedTime}`)
+    } else {
+      this.logger.log(`请求用户视频列表 ${count} 次耗时 ${usedTime}`)
+    }
     return result
   }
 }

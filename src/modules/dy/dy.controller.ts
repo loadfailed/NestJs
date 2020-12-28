@@ -11,6 +11,9 @@ import { queryRemoteDyUserInfo } from './utils/queryRemoteDyService'
 import axios from 'axios'
 
 import { CronJob } from 'cron'
+import { batchDownloadVideo } from '@/modules/dy/utils/dowloadVideo'
+import { WatcherResult } from './class/WatcherResult.class'
+import { sendWxMessage } from './utils/sendWxMessage'
 
 const watcher = { }
 
@@ -42,87 +45,56 @@ export class DyController {
   @Get('startWatch')
   @UseGuards(AuthGuard('jwt'))
   startWatch(@Request() { user }) {
-    let lock = false
-
+    let requsetLock = false
     // 异步查询awemelist
-    watcher[user.username] = new CronJob('*/10 * * * * *', () => {
+    watcher[user.username] = new CronJob('*/30 * 6-23 * * *', async () => {
       // 如果已经有查询，就跳过本次查询
-      if (lock) return
+      if (requsetLock) return
 
-      lock = true
+      requsetLock = true
 
-      const saveToDB:Array<Promise<any>> = []
+      const queryRemoteDataRequestList:Array<Promise<WatcherResult>> = user.following.reduce((pre:Array<Promise<WatcherResult>>, id:number) => {
+        const promise:Promise<WatcherResult> = new Promise(async (resolve) => {
+          const localUser = await this.dyService.findOne({ id })
+          const remoteUser = await queryRemoteDyUserInfo(localUser.sec_uid)
+          if (localUser.aweme_count !== remoteUser.aweme_count) {
+            const remoteAwemeList = await this.dyService.queryRemoteAwemeList(localUser.id)
 
-      const requestList = user.following.reduce((pre:Array<Promise<Array<DyAweme>>>, id:number) => {
-        let localUser:DyUser
-        const localAwemeList:Array<string> = []
-        const promise = this.dyService.findOne({ id })
-          .then((res:DyUser) => {
-            localUser = res
-            res.aweme_list.forEach((v:DyAweme) => (localAwemeList.push(v.id)))
-            return queryRemoteDyUserInfo(res.sec_uid)
-          })
-          .then((res:DyUser) => {
-            if (localUser.aweme_count !== res.aweme_count) {
-              saveToDB.push(this.dyService.updateDyUser(localUser.id, { aweme_count: res.aweme_count }))
-              return this.dyService.queryRemoteAwemeList(localUser.id)
-            }
-          })
-          .then((res:Array<DyAweme>) => {
-            if (!res) return []
             // 获取新更新的，数据库里还没有的
-            const news = res.filter((item:DyAweme) => {
+            const tempIds = localUser.aweme_list.map(v => v.id)
+            const news = remoteAwemeList.filter((item:DyAweme) => {
               const now = new Date().getTime()
               const upload = new Date(item.uploadTime).getTime()
-              const timeResult = (now - upload) <= (10 * 60 * 60 * 1000)
-              const includeResult = !localAwemeList.includes(item.id)
+              const timeResult = (now - upload) <= (72 * 60 * 60 * 1000)
+              const includeResult = !(tempIds.includes(item.id))
               return timeResult && includeResult
             })
-            saveToDB.push(this.dyService.saveDyAweme(news, localUser))
-            return news
-          })
+            await this.dyService.updateDyUser(localUser.id, { aweme_count: remoteUser.aweme_count })
+            await this.dyService.saveDyAweme(news, localUser)
+            resolve({
+              user: localUser,
+              list: news
+            })
+          } else {
+            resolve(new WatcherResult())
+          }
+        })
         pre.push(promise)
         return pre
       }, [])
 
-      // 数据推送到微信
-      Promise.all(requestList)
-        .then((res:Array<any>) => {
-          const list:Array<DyAweme> = res.reduce((pre:Array<DyAweme>, cur:Array<DyAweme>) => ([...pre, ...cur]), [])
-          if (!list.length) return
-          const text = `更新了${list.length}个视频`
-          const desp = list.reduce((pre, cur) => {
-            pre += `
-![logo](${cur.img})
-
-视频编号：${cur.id}，
-
-上传时间：${cur.uploadTime}，
-
-描述：${cur.desc}，
-
-视频地址：${cur.video}，
-
-____________________
-
-____________________
-
-`
-            return pre
-          }, '')
-          axios({
-            url: 'https://sc.ftqq.com/SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346.send',
-            params: {
-              text,
-              desp
-            }
-          })
-        })
-
-      // 数据储存到服务器本地
-      Promise.all(saveToDB)
-        .then(() => {
-          lock = false
+      // 获取数据更新
+      Promise.all(queryRemoteDataRequestList)
+        .then((res:Array<WatcherResult>) => {
+          console.log('query', res)
+          requsetLock = false
+          const list = res.filter(v => v.user)
+          sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
+          // sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
+          // batchDownloadVideo(list)
+          //   .then(res => {
+          //     console.log(res)
+          //   })
         })
     }, null, true)
 
@@ -138,7 +110,7 @@ ____________________
   @Get('stopWatch')
   @UseGuards(AuthGuard('jwt'))
   stopWatch(@Request() { user }) {
-    watcher[user.username].stop()
+    watcher[user.username]?.stop()
     return new ResModel(1, {}, '已停止监控')
   }
 }

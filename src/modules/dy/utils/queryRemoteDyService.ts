@@ -10,8 +10,7 @@ async function queryRemoteDyUserSecUid(u_code:string):Promise<string> {
   try {
     const { request: { path }} = await axios({
       url: `https://v.douyin.com/${u_code}/`,
-      method: 'get',
-      headers: { ...axiosConfig }
+      method: 'get'
     })
     const sec_uid = /(?<=sec_uid=)\S+?(?=&)/.exec(path)
     if (sec_uid) return sec_uid[0]
@@ -25,8 +24,7 @@ async function queryRemoteDyUserInfo(sec_uid:string):Promise<RemoteDyUserInfo> {
   try {
     const res = await axios({
       url: `${webUrl}/user/info/?sec_uid=${sec_uid}`,
-      method: 'get',
-      headers: { ...axiosConfig }
+      method: 'get'
     })
     if (res.data.status_code === 0) {
       const { uid: id, nickname, aweme_count } = res.data.user_info
