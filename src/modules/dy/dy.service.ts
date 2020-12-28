@@ -1,6 +1,6 @@
 import { formatDate } from '@/utils/formatDate'
 import { DyUser } from './entity/dyUser.entity'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { Repository, getRepository, createQueryBuilder } from 'typeorm'
 
 import { InjectRepository } from '@nestjs/typeorm'
@@ -17,6 +17,7 @@ interface FindDyUser {
 
 @Injectable()
 export class DyService {
+  private readonly logger = new Logger('DyService')
   constructor(
     @InjectRepository(DyUser)
     private readonly dyUserRepository: Repository<DyUser>,
@@ -101,7 +102,7 @@ export class DyService {
       count++
     }
     const endTime = new Date().getTime()
-    console.log(`请求用户视频列表 ${count} 次耗时 ${(endTime - startTime) / 1000}`)
+    this.logger.log(`请求用户视频列表 ${count} 次耗时 ${(endTime - startTime) / 1000}`)
     return result
   }
 }

@@ -1,4 +1,3 @@
-import { RemoteDyUserInfo } from './class/RemoteDyUserInfo.class'
 import { DyUser } from './entity/dyUser.entity'
 import { DyAweme } from './entity/dyAweme.entity'
 import { AuthGuard } from '@nestjs/passport'
@@ -46,11 +45,13 @@ export class DyController {
     let lock = false
 
     // 异步查询awemelist
-    watcher[user.username] = new CronJob('*/30 * * * * *', () => {
+    watcher[user.username] = new CronJob('*/10 * * * * *', () => {
       // 如果已经有查询，就跳过本次查询
       if (lock) return
 
       lock = true
+
+      const saveToDB:Array<Promise<any>> = []
 
       const requestList = user.following.reduce((pre:Array<Promise<Array<DyAweme>>>, id:number) => {
         let localUser:DyUser
@@ -63,7 +64,7 @@ export class DyController {
           })
           .then((res:DyUser) => {
             if (localUser.aweme_count !== res.aweme_count) {
-              this.dyService.updateDyUser(localUser.id, { aweme_count: res.aweme_count })
+              saveToDB.push(this.dyService.updateDyUser(localUser.id, { aweme_count: res.aweme_count }))
               return this.dyService.queryRemoteAwemeList(localUser.id)
             }
           })
@@ -77,20 +78,24 @@ export class DyController {
               const includeResult = !localAwemeList.includes(item.id)
               return timeResult && includeResult
             })
-            this.dyService.saveDyAweme(news, localUser)
+            saveToDB.push(this.dyService.saveDyAweme(news, localUser))
             return news
           })
         pre.push(promise)
         return pre
       }, [])
 
+      // 数据推送到微信
       Promise.all(requestList)
         .then((res:Array<any>) => {
           const list:Array<DyAweme> = res.reduce((pre:Array<DyAweme>, cur:Array<DyAweme>) => ([...pre, ...cur]), [])
+          if (!list.length) return
           const text = `更新了${list.length}个视频`
           const desp = list.reduce((pre, cur) => {
             pre += `
 ![logo](${cur.img})
+
+视频编号：${cur.id}，
 
 上传时间：${cur.uploadTime}，
 
@@ -112,6 +117,11 @@ ____________________
               desp
             }
           })
+        })
+
+      // 数据储存到服务器本地
+      Promise.all(saveToDB)
+        .then(() => {
           lock = false
         })
     }, null, true)

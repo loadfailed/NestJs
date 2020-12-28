@@ -1,19 +1,17 @@
+import { axiosConfig } from '@/common/config/axios.config'
 import axios from 'axios'
 import { RemoteDyUserInfo } from '../class/RemoteDyUserInfo.class'
 import { DyAweme } from '../entity/dyAweme.entity'
 
 const webUrl = 'https://www.iesdouyin.com/web/api/v2'
 const appUrl = 'https://aweme-hl.snssdk.com/aweme/v1'
-const headers = {
-  'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-}
 
 async function queryRemoteDyUserSecUid(u_code:string):Promise<string> {
   try {
     const { request: { path }} = await axios({
       url: `https://v.douyin.com/${u_code}/`,
       method: 'get',
-      headers
+      headers: { ...axiosConfig }
     })
     const sec_uid = /(?<=sec_uid=)\S+?(?=&)/.exec(path)
     if (sec_uid) return sec_uid[0]
@@ -28,7 +26,7 @@ async function queryRemoteDyUserInfo(sec_uid:string):Promise<RemoteDyUserInfo> {
     const res = await axios({
       url: `${webUrl}/user/info/?sec_uid=${sec_uid}`,
       method: 'get',
-      headers
+      headers: { ...axiosConfig }
     })
     if (res.data.status_code === 0) {
       const { uid: id, nickname, aweme_count } = res.data.user_info

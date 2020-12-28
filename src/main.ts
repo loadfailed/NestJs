@@ -1,11 +1,3 @@
-/*
- * @Author: your name
- * @Date: 2020-09-26 13:44:29
- * @LastEditTime: 2020-10-07 04:00:44
- * @LastEditors: your name
- * @Description: In User Settings Edit
- * @FilePath: /server/src/main.ts
- */
 import { MainInterceptor } from './common/interceptor/main.interceptor'
 import { AuthGuard } from './common/guard/auth.guard'
 import { AnyExceptionFilter } from './common/filter/any.exception.filter'
@@ -14,10 +6,13 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { logger } from './common/middleware/logger.middleware'
+import { Log4jsService } from '@quickts/nestjs-log4js'
+
 import 'reflect-metadata'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const log4js = new Log4jsService()
+  const app = await NestFactory.create(AppModule, { logger: log4js })
   app.use(logger)
   app.useGlobalFilters(new AnyExceptionFilter())
   app.useGlobalFilters(new HttpExceptionFilter())
