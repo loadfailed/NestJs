@@ -87,6 +87,9 @@ async function queryRemoteDyUserAwemeList(id:number | string):Promise<Array<DyAw
 
       const imgUrl = `https://p29-dy.byteimg.com/img/${video.cover.uri}~c5_1080x1920.jpeg?from=2563711402_large`
 
+      console.log(video.play_addr)
+      console.log(video.download_addr)
+
       return new DyAweme(aweme_id, videoUrl, imgUrl, desc, is_top, create_time)
     })
   } catch (error) {

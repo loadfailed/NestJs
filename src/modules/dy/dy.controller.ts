@@ -14,6 +14,8 @@ import { CronJob } from 'cron'
 import { batchDownloadVideo } from '@/modules/dy/utils/dowloadVideo'
 import { WatcherResult } from './class/WatcherResult.class'
 import { sendWxMessage } from './utils/sendWxMessage'
+import { urlencoded } from 'express'
+import { uploadToTencent } from './utils/uploadVideo'
 
 const watcher = { }
 
@@ -45,6 +47,8 @@ export class DyController {
   @Get('startWatch')
   @UseGuards(AuthGuard('jwt'))
   startWatch(@Request() { user }) {
+    uploadToTencent()
+    if (watcher[user.username]) return new ResModel(0, {}, '已开始监控，请勿重复提交请求')
     let requsetLock = false
     // 异步查询awemelist
     watcher[user.username] = new CronJob('*/10 * 7-23 * * *', async () => {
@@ -55,7 +59,7 @@ export class DyController {
 
       const queryRemoteDataRequestList:Array<Promise<WatcherResult>> = user.following.reduce((pre:Array<Promise<WatcherResult>>, id:number) => {
         const promise:Promise<WatcherResult> = new Promise(async (resolve) => {
-          const localUser = await this.dyService.findOne({ id })
+          const localUser:DyUser = await this.dyService.findOne({ id })
           const remoteUser = await queryRemoteDyUserInfo(localUser.sec_uid)
           if (localUser.aweme_count !== remoteUser.aweme_count) {
             const remoteAwemeList = await this.dyService.queryRemoteAwemeList(localUser.id)
@@ -68,8 +72,7 @@ export class DyController {
               const includeResult = !(tempIds.includes(item.id))
               return timeResult && includeResult
             })
-            await this.dyService.updateDyUser(localUser.id, { aweme_count: remoteUser.aweme_count })
-            await this.dyService.saveDyAweme(news, localUser)
+
             resolve({
               user: localUser,
               list: news
@@ -87,13 +90,9 @@ export class DyController {
         .then((res:Array<WatcherResult>) => {
           requsetLock = false
           const list = res.filter(v => v.user)
-          console.log('list', list)
+          list.forEach(v => v.user.aweme_list.push(...v.list))
           sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
-          // sendWxMessage(list, 'SCU42770Td244eee6f2eaa2d962c1828d1e7af72e5c4715bee5346')
-          // batchDownloadVideo(list)
-          //   .then(res => {
-          //     console.log(res)
-          //   })
+          batchDownloadVideo(list)
         })
     }, null, true)
 
@@ -108,11 +107,11 @@ export class DyController {
 
   @Get('stopWatch')
   @UseGuards(AuthGuard('jwt'))
-  stopWatch(@Request() { user }) {
+  async stopWatch(@Request() { user }) {
     watcher[user.username]?.stop()
+    // await this.dyService.updateDyUser(localUser.id, { aweme_count: remoteUser.aweme_count })
+    // await this.dyService.saveDyAweme(news, localUser)
     return new ResModel(1, {}, '已停止监控')
   }
 }
-
-// lock = false
 
